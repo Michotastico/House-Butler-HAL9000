@@ -16,6 +16,8 @@ TOKEN = sys.argv[1]
 ids = data.ids
 bot = Hal9000(TOKEN, ids)
 
+bot.send_master_message("HAL-9000 fully operational")
+
 print ('Running ...')
 
 while bot.running:
