@@ -1,6 +1,9 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import urllib
 import json
 from datetime import datetime
+import collections
 
 
 class Weather:
@@ -9,6 +12,30 @@ class Weather:
         self.last_update = ''
         self.last_hour = ''
         self.forecast = None
+        self.emoji = {
+            'Clear': '☀',
+            'few clouds': '🌤',
+            'Clouds': '☁',
+            'Drizzle': '🌦',
+            'Rain': '🌧',
+            'Thunderstorm': '🌩',
+            'Snow': '🌨',
+            'Atmosphere': '🌫',
+            'Extreme': '',
+            'Additional': ''
+        }
+        self.translate = {
+            'Clear': 'Cielo despejado',
+            'few clouds': 'Nubocidad parcial',
+            'Clouds': 'Nublado',
+            'Drizzle': 'Llovizna',
+            'Rain': 'Lluvia',
+            'Thunderstorm': 'Tormenta eléctrica',
+            'Snow': 'Nieve',
+            'Atmosphere': 'Neblina',
+            'Extreme' :'Clima inusual',
+            'Additional': 'Clima inusual'
+        }
 
     def is_updated(self):
         date = datetime.now()
@@ -52,10 +79,13 @@ class Weather:
                 day, hour = parse_date(f)
                 if hour == midday:
                     self.forecast[day]['weather'] = f['weather'][0]['main']
+                    self.forecast[day]['weather_description'] = f['weather'][0]['description']
             if day == self.last_update:
                 self.forecast[day]['weather'] = self.forecast[day]['forecast'][0]['weather'][0]['main']
+                self.forecast[day]['weather_description'] = self.forecast[day]['forecast'][0]['weather'][0]['description']
             self.forecast[day]['temp_min'] = temp_min
             self.forecast[day]['temp_max'] = temp_max
+        self.forecast = collections.OrderedDict(sorted(self.forecast.items()))
 
     def update(self):
         if not self.is_updated():
@@ -65,7 +95,22 @@ class Weather:
 
     def show(self):
         for key, fore in self.forecast.items():
-            print key, fore['weather'], fore['temp_min'], fore['temp_max']
+            print key, fore['weather'], fore['weather_description'], fore['temp_min'], fore['temp_max']
+
+    def get_forecast(self):
+        return self.forecast.copy()
+
+    def forecast_to_string(self):
+        string = ''
+        for key, fore in self.forecast.items():
+            date = str(key)
+            emoji = self.emoji[fore['weather']]
+            text = self.translate[fore['weather']]
+            min = ' Min: ' + str(fore['temp_min']) + '°C'
+            max = ' Max: ' + str(fore['temp_max']) + '°C'
+            concat = date + ' ' + text + ' ' + emoji + min + max + '\n'
+            string += concat
+        return string
 
 
 def parse_date(data):

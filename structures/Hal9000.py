@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import telepot
 from private_data import data
-
+from Weather import Weather
 
 class Hal9000:
     def __init__(self, token, ids):
@@ -10,6 +10,8 @@ class Hal9000:
         self.bot = telepot.Bot(token)
         self.bot.message_loop(self.handle)
         self.running = True
+        self.weather = Weather(data.city, data.pid)
+        self.weather.update()
 
     def handle(self, msg):
         msg_type, chat_type, chat_id = telepot.glance(msg)
@@ -33,7 +35,9 @@ class Hal9000:
             self.running = False
 
     def weather_message(self, id_receiver):
-        self.bot.sendMessage(id_receiver, 'Hoy es un bello día')
+        self.weather.update()
+        forecast = self.weather.forecast_to_string()
+        self.bot.sendMessage(id_receiver, forecast)
 
     def events_message(self, id_receiver):
         self.bot.sendMessage(id_receiver, 'También me gustaría ir a eventos!')
